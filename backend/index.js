@@ -49,6 +49,22 @@ const initDB = async () => {
         image TEXT
       );
     `);
+    // Seed products if empty
+    const productCheck = await pool.query('SELECT COUNT(*) FROM products');
+    if (parseInt(productCheck.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO products (name, brand, price, original_price, discount, image) VALUES
+        ('Premium Leather Wallet', 'Tommy Hilfiger', 1499, 2999, 50, 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=400'),
+        ('Aviator Sunglasses', 'Ray-Ban', 3799, 7599, 50, 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=400'),
+        ('Analog Watch', 'Fossil', 4999, 9999, 50, 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=400'),
+        ('Canvas Backpack', 'Wildcraft', 1299, 2599, 50, 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400'),
+        ('Wayfarer Sunglasses', 'Oakley', 4299, 8599, 50, 'https://images.unsplash.com/photo-1577803645773-f96470509666?auto=format&fit=crop&q=80&w=400'),
+        ('Chronograph Watch', 'Casio', 5999, 11999, 50, 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=400'),
+        ('Slim Leather Belt', 'Levis', 899, 1799, 50, 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&q=80&w=400'),
+        ('Crossbody Sling Bag', 'Caprese', 1899, 3799, 50, 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=400');
+      `);
+      console.log("Database seeded with products");
+    }
     console.log("Database initialized (tables verified)");
   } catch (err) {
     console.error("Error initializing database:", err.message);
@@ -80,14 +96,10 @@ app.post('/api/orders', async (req, res) => {
   const { full_name, email_address, delivery_address, total_bill } = req.body;
   try {
     const query = `
-      INSERT INTO orders (full_name, email_address, delivery_address, subtotal, tax, total_bill)
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+      INSERT INTO orders (full_name, email_address, delivery_address, total_bill)
+      VALUES ($1, $2, $3, $4) RETURNING *`;
 
-    // Hardcoded subtotal/tax logic for the example based on your screenshot
-    const subtotal = 3799.00;
-    const tax = 683.82;
-
-    const result = await pool.query(query, [full_name, email_address, delivery_address, subtotal, tax, total_bill]);
+    const result = await pool.query(query, [full_name, email_address, delivery_address, total_bill]);
     res.json({ message: "Order Saved Automatically!", order: result.rows[0] });
   } catch (err) {
     console.error(err);
@@ -95,20 +107,36 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// 4. Products Endpoint
+// 4. ADMIN: Fetch all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database Error");
+  }
+});
+
+// 5. ADMIN: Fetch all orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database Error");
+  }
+});
+
+// 6. Products Endpoint
 app.get('/api/products', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM products');
     res.json(result.rows);
   } catch (err) {
-    console.error(err.message);
-    // Fallback dummy data if table isn't ready
-    res.json([
-      { id: 101, name: 'Premium Leather Wallet', brand: 'Tommy Hilfiger', price: 1499, originalPrice: 2999, discount: 50, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=400' },
-      { id: 102, name: 'Aviator Sunglasses', brand: 'Ray-Ban', price: 3799, originalPrice: 7599, discount: 50, image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=400' },
-      { id: 103, name: 'Analog Watch', brand: 'Fossil', price: 4999, originalPrice: 9999, discount: 50, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=400' },
-      { id: 104, name: 'Canvas Backpack', brand: 'Wildcraft', price: 1299, originalPrice: 2599, discount: 50, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400' }
-    ]);
+    console.error('Error fetching products:', err.message);
+    res.status(500).json({ error: "Could not fetch products" });
   }
 });
 

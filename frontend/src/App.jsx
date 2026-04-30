@@ -9,6 +9,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home'); // 'home', 'shop', 'cart', 'login', 'admin'
   const [cart, setCart] = useState([]);
   const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [customer, setCustomer] = useState({ name: '', email: '', address: '' });
 
   useEffect(() => {
@@ -293,17 +294,27 @@ function App() {
             </div>
           </div>
         )}
-
         {/* ADMIN AUTH PAGE */}
         {currentPage === 'admin-auth' && (
           <div className="auth-page">
             <div className="auth-container">
               <h2>Admin Access</h2>
               <p>Please enter your credentials to access the dashboard.</p>
-              <form className="auth-form" onSubmit={(e) => { 
+              <form className="auth-form" onSubmit={async (e) => { 
                 e.preventDefault(); 
-                alert('Admin authenticated!');
-                setCurrentPage('admin');
+                try {
+                  const [userRes, orderRes] = await Promise.all([
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users`),
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders`)
+                  ]);
+                  setUsers(userRes.data);
+                  setOrders(orderRes.data);
+                  alert('Admin authenticated!');
+                  setCurrentPage('admin');
+                } catch (err) {
+                  console.error('Admin fetch error', err);
+                  alert('Error fetching data from database');
+                }
               }}>
                 <div className="form-group">
                   <label>Username</label>
@@ -326,33 +337,71 @@ function App() {
         {/* ADMIN DASHBOARD PAGE */}
         {currentPage === 'admin' && (
           <div className="admin-page">
-            <h2>Admin Dashboard</h2>
+            <div className="page-header">
+              <h2>Admin Dashboard</h2>
+              <p>Manage users and monitor orders in real-time.</p>
+            </div>
+
             <div className="admin-section">
-              <h3>User Management</h3>
+              <h3>Registered Users</h3>
               <div className="table-responsive">
                 <table className="admin-table">
                   <thead>
                     <tr>
-                      <th>Username</th>
+                      <th>ID</th>
                       <th>Email</th>
-                      <th>Password</th>
+                      <th>Joined On</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.length === 0 ? (
                       <tr>
-                        <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>
-                          No users have registered yet.
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                          No users found in database.
                         </td>
                       </tr>
                     ) : (
                       users.map(user => (
                         <tr key={user.id}>
-                          <td>{user.username}</td>
+                          <td>#{user.id}</td>
                           <td>{user.email}</td>
-                          <td>••••••••</td>
-                          <td><button className="text-btn">Remove</button></td>
+                          <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                          <td><button className="text-btn">Manage</button></td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="admin-section" style={{ marginTop: '4rem' }}>
+              <h3>Recent Orders</h3>
+              <div className="table-responsive">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Total</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                          No orders placed yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      orders.map((order, i) => (
+                        <tr key={order.id}>
+                          <td>#ORD-{order.id}</td>
+                          <td>{order.full_name}</td>
+                          <td>₹{order.total_bill}</td>
+                          <td>{new Date(order.created_at).toLocaleDateString()}</td>
                         </tr>
                       ))
                     )}
