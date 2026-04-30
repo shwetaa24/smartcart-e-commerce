@@ -51,7 +51,7 @@ function App() {
     setCart(newCart);
   };
 
-  const cartTotal = cart.reduce((total, item) => total + (item.price || 0), 0);
+  const cartTotal = cart.reduce((total, item) => total + (Number(item.price) || 0), 0);
   const tax = cartTotal * 0.18; // 18% tax
   const finalTotal = cartTotal + tax;
 
@@ -203,7 +203,7 @@ function App() {
                         <p className="item-brand">{item.brand}</p>
                       </div>
                       <div className="cart-item-price">
-                        ₹{item.price}
+                        ₹{item.price ? Math.round(Number(item.price)) : 0}
                       </div>
                       <button className="remove-btn" onClick={() => removeFromCart(index)}>Remove</button>
                     </div>

@@ -48,6 +48,13 @@ const initDB = async () => {
         discount INTEGER,
         image TEXT
       );
+      CREATE TABLE IF NOT EXISTS admins (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `);
     // Seed products if empty
     const productCheck = await pool.query('SELECT COUNT(*) FROM products');
@@ -65,6 +72,17 @@ const initDB = async () => {
       `);
       console.log("Database seeded with products");
     }
+
+    // Seed admin if empty
+    const adminCheck = await pool.query('SELECT COUNT(*) FROM admins');
+    if (parseInt(adminCheck.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO admins (username, email, password_hash) 
+        VALUES ('admin', 'admin@swiftcart.com', 'admin123')
+      `);
+      console.log("Database seeded with default admin");
+    }
+    
     console.log("Database initialized (tables verified)");
   } catch (err) {
     console.error("Error initializing database:", err.message);
@@ -121,7 +139,7 @@ app.get('/api/users', async (req, res) => {
 // 5. ADMIN: Fetch all orders
 app.get('/api/orders', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM orders ORDER BY order_date DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
