@@ -35,6 +35,14 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          mkdir -p ~/swiftcart
+          echo "DB_USER=${{ secrets.DB_USER }}" > ~/swiftcart/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/swiftcart/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> ~/swiftcart/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> ~/swiftcart/.env
+          echo "DB_PORT=5432" >> ~/swiftcart/.env
+          
+          cd ~/swiftcart
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
-          cd ~/swiftcart && docker-compose up -d
+          docker compose up -d --force-recreate
