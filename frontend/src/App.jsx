@@ -27,7 +27,7 @@ function App() {
       ];
 
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/products`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/products`);
         let fetched = response.data;
         
         // Merge with mock data if less than 8 items found
@@ -83,7 +83,7 @@ function App() {
 
     try {
       // Attempt to save order to Database
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/orders`, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/orders`, {
         full_name: customer.name,
         email_address: customer.email,
         delivery_address: customer.address,
@@ -287,7 +287,7 @@ function App() {
                 const username = email.split('@')[0];
                 
                 try {
-                  const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/login`, { email, password });
+                  const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/login`, { email, password });
                   setUsers([...users, response.data.user]);
                   alert(`Successfully registered/logged in as ${username}!`);
                   e.target.reset();
@@ -324,7 +324,7 @@ function App() {
 
                 try {
                   // Verify/Register Admin in DB
-                  await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/admin/login`, { username, email, password });
+                  await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/admin/login`, { username, email, password });
 
                   // Fetch Dashboard Data
                   const [userRes, orderRes] = await Promise.all([
@@ -369,8 +369,8 @@ function App() {
               <button className="auth-btn" onClick={async () => {
                 try {
                   const [userRes, orderRes] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/users`),
-                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/orders`)
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/users`),
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101'}/api/orders`)
                   ]);
                   setUsers(userRes.data);
                   setOrders(orderRes.data);

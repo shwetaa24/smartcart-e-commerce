@@ -26,7 +26,7 @@ jobs:
     - name: Build and Push Frontend Image
       run: |
         docker build \
-          --build-arg VITE_API_URL=http://${{ secrets.EC2_HOST }}:5001 \
+          --build-arg VITE_API_URL=http://${{ secrets.EC2_HOST }} \
           -t ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest \
           ./frontend
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
