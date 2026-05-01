@@ -1,0 +1,30 @@
+# SwiftCart - Build & Run Latest Code
+# Usage: docker compose -f docker-compose.build.yml up -d --build
+# Then open: http://localhost:3000
+
+services:
+  backend:
+    build: ./backend
+    container_name: swiftcart-backend
+    restart: always
+    ports:
+      - "5002:5001"
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=Shweta@123
+      - DB_HOST=smartcart-db.cvqeakkuglt3.ap-south-1.rds.amazonaws.com
+      - DB_NAME=postgres
+      - DB_PORT=5432
+      - NODE_ENV=production
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5002
+    container_name: swiftcart-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

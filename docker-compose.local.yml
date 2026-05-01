@@ -1,0 +1,27 @@
+# SwiftCart - Run Latest Beautiful UI
+# Usage: docker compose -f docker-compose.local.yml up -d
+# Then open: http://localhost:3000
+
+services:
+  backend:
+    image: swiftcart-new-backend:latest
+    container_name: swiftcart-backend
+    restart: always
+    ports:
+      - "5002:5001"
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=Shweta@123
+      - DB_HOST=smartcart-db.cvqeakkuglt3.ap-south-1.rds.amazonaws.com
+      - DB_NAME=postgres
+      - DB_PORT=5432
+      - NODE_ENV=production
+
+  frontend:
+    image: swiftcart-new-frontend:latest
+    container_name: swiftcart-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
