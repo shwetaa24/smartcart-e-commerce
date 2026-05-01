@@ -35,20 +35,36 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          mkdir -p ~/swiftcart
+          # ── Step 1: Install Docker if not present ──────────────────────
+          if ! command -v docker &> /dev/null; then
+            echo "Installing Docker..."
+            sudo apt-get update -y
+            sudo apt-get install -y docker.io docker-compose-plugin
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ubuntu
+          fi
 
-          # Write the .env file with RDS credentials
-          cat > ~/swiftcart/.env << 'ENVEOF'
+          # ── Step 2: Ensure docker compose (v2) works ───────────────────
+          if ! docker compose version &> /dev/null; then
+            sudo apt-get install -y docker-compose-plugin
+          fi
+
+          # ── Step 3: Create project directory ───────────────────────────
+          mkdir -p ~/swiftcart
+          cd ~/swiftcart
+
+          # ── Step 4: Write RDS environment variables ─────────────────────
+          cat > .env << 'ENVEOF'
           DB_USER=${{ secrets.DB_USER }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_HOST=${{ secrets.DB_HOST }}
           DB_NAME=${{ secrets.DB_NAME }}
           DB_PORT=5432
-          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
           ENVEOF
 
-          # Write the docker-compose.yml directly on the EC2
-          cat > ~/swiftcart/docker-compose.yml << 'EOF'
+          # ── Step 5: Write docker-compose.yml ────────────────────────────
+          cat > docker-compose.yml << 'COMPOSEEOF'
           services:
             backend:
               image: ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
@@ -67,14 +83,12 @@ jobs:
                 - "80:80"
               depends_on:
                 - backend
-          EOF
+          COMPOSEEOF
 
-          cd ~/swiftcart
+          # ── Step 6: Pull latest images & restart containers ─────────────
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
+          sudo docker compose down || true
+          sudo docker compose up -d
 
-          # Pull latest images
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
-
-          # Stop old containers and start fresh
-          docker compose down || true
-          docker compose up -d
+          echo "✅ SwiftCart deployed at http://${{ secrets.EC2_HOST }}"
