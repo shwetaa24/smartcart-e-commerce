@@ -36,13 +36,45 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           mkdir -p ~/swiftcart
-          echo "DB_USER=${{ secrets.DB_USER }}" > ~/swiftcart/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/swiftcart/.env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> ~/swiftcart/.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> ~/swiftcart/.env
-          echo "DB_PORT=5432" >> ~/swiftcart/.env
-          
+
+          # Write the .env file with RDS credentials
+          cat > ~/swiftcart/.env << 'ENVEOF'
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_PORT=5432
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          ENVEOF
+
+          # Write the docker-compose.yml directly on the EC2
+          cat > ~/swiftcart/docker-compose.yml << 'EOF'
+          services:
+            backend:
+              image: ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
+              container_name: swiftcart-backend
+              restart: always
+              ports:
+                - "5001:5001"
+              env_file:
+                - .env
+
+            frontend:
+              image: ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
+              container_name: swiftcart-frontend
+              restart: always
+              ports:
+                - "80:80"
+              depends_on:
+                - backend
+          EOF
+
           cd ~/swiftcart
+
+          # Pull latest images
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-backend:latest
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/swiftcart-frontend:latest
-          docker compose up -d --force-recreate
+
+          # Stop old containers and start fresh
+          docker compose down || true
+          docker compose up -d

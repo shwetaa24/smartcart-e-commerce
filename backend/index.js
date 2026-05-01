@@ -82,7 +82,7 @@ const initDB = async () => {
       `);
       console.log("Database seeded with default admin");
     }
-    
+
     console.log("Database initialized (tables verified)");
   } catch (err) {
     console.error("Error initializing database:", err.message);
@@ -93,8 +93,8 @@ initDB();
 // 2. AUTOMATIC LOGIN/SIGNUP: Save user to DB
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log(`Login attempt for: ${email}`);
   try {
-    // This query checks if user exists, if not, it inserts them automatically
     const query = `
       INSERT INTO users (email, password_hash) 
       VALUES ($1, $2) 
@@ -102,9 +102,30 @@ app.post('/api/login', async (req, res) => {
       RETURNING *`;
 
     const result = await pool.query(query, [email, password]);
+    console.log(`User processed: ${result.rows[0].email} (ID: ${result.rows[0].id})`);
     res.json({ message: "Success", user: result.rows[0] });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err.message);
+    res.status(500).send("Database Error");
+  }
+});
+
+// 2b. ADMIN LOGIN: Verify or create admin
+app.post('/api/admin/login', async (req, res) => {
+  const { username, email, password } = req.body;
+  console.log(`Admin login attempt for: ${email}`);
+  try {
+    const query = `
+      INSERT INTO admins (username, email, password_hash) 
+      VALUES ($1, $2, $3) 
+      ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username 
+      RETURNING *`;
+
+    const result = await pool.query(query, [username, email, password]);
+    console.log(`Admin processed: ${result.rows[0].email} (ID: ${result.rows[0].id})`);
+    res.json({ message: "Success", admin: result.rows[0] });
+  } catch (err) {
+    console.error('Admin login error:', err.message);
     res.status(500).send("Database Error");
   }
 });
@@ -112,15 +133,17 @@ app.post('/api/login', async (req, res) => {
 // 3. AUTOMATIC ORDER: Save bill to DB
 app.post('/api/orders', async (req, res) => {
   const { full_name, email_address, delivery_address, total_bill } = req.body;
+  console.log(`New order request from: ${full_name} (${email_address})`);
   try {
     const query = `
       INSERT INTO orders (full_name, email_address, delivery_address, total_bill)
       VALUES ($1, $2, $3, $4) RETURNING *`;
 
     const result = await pool.query(query, [full_name, email_address, delivery_address, total_bill]);
+    console.log(`Order saved: ID ${result.rows[0].id}`);
     res.json({ message: "Order Saved Automatically!", order: result.rows[0] });
   } catch (err) {
-    console.error(err);
+    console.error('Order save error:', err.message);
     res.status(500).send("Database Error");
   }
 });
@@ -139,7 +162,7 @@ app.get('/api/users', async (req, res) => {
 // 5. ADMIN: Fetch all orders
 app.get('/api/orders', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM orders ORDER BY order_date DESC');
+    const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -162,7 +185,7 @@ app.get('/', (req, res) => {
   res.send('SwiftCart RDS Backend is live');
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

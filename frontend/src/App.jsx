@@ -14,25 +14,32 @@ function App() {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      const mockData = [
+        { id: 101, name: 'Premium Leather Wallet', brand: 'Tommy Hilfiger', price: 1499, originalPrice: 2999, discount: 50, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=600' },
+        { id: 102, name: 'Aviator Sunglasses', brand: 'Ray-Ban', price: 3799, originalPrice: 7599, discount: 50, image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=600' },
+        { id: 103, name: 'Analog Watch', brand: 'Fossil', price: 4999, originalPrice: 9999, discount: 50, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=600' },
+        { id: 104, name: 'Canvas Backpack', brand: 'Wildcraft', price: 1299, originalPrice: 2599, discount: 50, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=600' },
+        { id: 105, name: 'Wayfarer Sunglasses', brand: 'Oakley', price: 4299, originalPrice: 8599, discount: 50, image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?auto=format&fit=crop&q=80&w=600' },
+        { id: 106, name: 'Chronograph Watch', brand: 'Casio', price: 5999, originalPrice: 11999, discount: 50, image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=600' },
+        { id: 107, name: 'Slim Leather Belt', brand: 'Levis', price: 899, originalPrice: 1799, discount: 50, image: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&q=80&w=600' },
+        { id: 108, name: 'Crossbody Sling Bag', brand: 'Caprese', price: 1899, originalPrice: 3799, discount: 50, image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=600' },
+      ];
+
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/products`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/products`);
         let fetched = response.data;
+        
+        // Merge with mock data if less than 8 items found
         if (fetched.length < 8) {
-          const mockData = [
-            { id: 101, name: 'Premium Leather Wallet', brand: 'Tommy Hilfiger', price: 1499, originalPrice: 2999, discount: 50, image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=400' },
-            { id: 102, name: 'Aviator Sunglasses', brand: 'Ray-Ban', price: 3799, originalPrice: 7599, discount: 50, image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=400' },
-            { id: 103, name: 'Analog Watch', brand: 'Fossil', price: 4999, originalPrice: 9999, discount: 50, image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=400' },
-            { id: 104, name: 'Canvas Backpack', brand: 'Wildcraft', price: 1299, originalPrice: 2599, discount: 50, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=400' },
-            { id: 105, name: 'Wayfarer Sunglasses', brand: 'Oakley', price: 4299, originalPrice: 8599, discount: 50, image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?auto=format&fit=crop&q=80&w=400' },
-            { id: 106, name: 'Chronograph Watch', brand: 'Casio', price: 5999, originalPrice: 11999, discount: 50, image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=400' },
-            { id: 107, name: 'Slim Leather Belt', brand: 'Levis', price: 899, originalPrice: 1799, discount: 50, image: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&q=80&w=400' },
-            { id: 108, name: 'Crossbody Sling Bag', brand: 'Caprese', price: 1899, originalPrice: 3799, discount: 50, image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=400' },
-          ];
-          fetched = [...fetched, ...mockData.filter(m => !fetched.find(f => f.name === m.name))];
+          const merged = [...fetched, ...mockData.filter(m => !fetched.find(f => f.name === m.name))];
+          setProducts(merged);
+        } else {
+          setProducts(fetched);
         }
-        setProducts(fetched);
       } catch (err) {
-        console.error('Error fetching products', err);
+        console.error('Error fetching products, using fallback data', err);
+        setProducts(mockData);
       } finally {
         setLoading(false);
       }
@@ -61,32 +68,35 @@ function App() {
       return;
     }
 
+    const itemsList = cart.map(item => `- ${item.name} (₹${item.price})`).join('%0A');
+    const subject = `SWIFTCART Bill - Order for ${customer.name}`;
+    const body = `SWIFTCART BILL%0A%0A` +
+      `Customer Details:%0A` +
+      `Name: ${customer.name}%0A` +
+      `Email: ${customer.email}%0A` +
+      `Address: ${customer.address}%0A%0A` +
+      `Items:%0A${itemsList}%0A%0A` +
+      `Total Bill: ₹${finalTotal.toFixed(2)}%0A%0A` +
+      `Thank you for shopping with us!`;
+
+    const mailtoUrl = `mailto:${customer.email}?subject=${encodeURIComponent(subject)}&body=${body}`;
+
     try {
-      // Save order to RDS Database
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders`, {
+      // Attempt to save order to Database
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/orders`, {
         full_name: customer.name,
         email_address: customer.email,
         delivery_address: customer.address,
         total_bill: finalTotal
       });
-
-      const itemsList = cart.map(item => `- ${item.name} (₹${item.price})`).join('%0A');
-      const subject = `SWIFTCART Bill - Order for ${customer.name}`;
-      const body = `SWIFTCART BILL%0A%0A` +
-        `Order Saved to Database!%0A%0A` +
-        `Customer Details:%0A` +
-        `Name: ${customer.name}%0A` +
-        `Email: ${customer.email}%0A` +
-        `Address: ${customer.address}%0A%0A` +
-        `Items:%0A${itemsList}%0A%0A` +
-        `Total Bill: ₹${finalTotal.toFixed(2)}%0A%0A` +
-        `Thank you for shopping with us!`;
-
-      const mailtoUrl = `mailto:${customer.email}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      
+      // If successful, redirect to mailto
       window.location.href = mailtoUrl;
     } catch (err) {
-      console.error('Order error', err);
-      alert('Failed to save order to database. Please check your backend connection.');
+      console.error('Order database save error', err);
+      if (confirm('The database is currently unreachable, but we can still generate your bill via email. Would you like to proceed?')) {
+        window.location.href = mailtoUrl;
+      }
     }
   };
 
@@ -149,28 +159,34 @@ function App() {
               <div className="loading-spinner">Loading collection...</div>
             ) : (
               <div className="product-grid">
-                {products.map((product) => (
-                  <div key={product.id} className="product-card">
-                    <div className="product-image">
-                      {product.image && product.image.startsWith('http') ? (
-                        <img src={product.image} alt={product.name} />
-                      ) : (
-                        <div className="placeholder-image">IMG</div>
-                      )}
-                    </div>
-                    <div className="product-details">
-                      <h3 className="brand-name">{product.brand || 'SwiftCart'}</h3>
-                      <p className="product-name">{product.name}</p>
-                      <div className="price-section">
-                        <span className="current-price">₹{product.price ? Math.round(product.price) : 0}</span>
-                        {product.originalPrice && (
-                          <span className="original-price">₹{product.originalPrice}</span>
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <div key={product.id} className="product-card">
+                      <div className="product-image">
+                        {product.image && product.image.startsWith('http') ? (
+                          <img src={product.image} alt={product.name} />
+                        ) : (
+                          <div className="placeholder-image">IMG</div>
                         )}
                       </div>
-                      <button className="add-to-cart-btn" onClick={() => addToCart(product)}>Add to Cart</button>
+                      <div className="product-details">
+                        <h3 className="brand-name">{product.brand || 'SwiftCart'}</h3>
+                        <p className="product-name">{product.name}</p>
+                        <div className="price-section">
+                          <span className="current-price">₹{product.price ? Math.round(product.price) : 0}</span>
+                          {product.originalPrice && (
+                            <span className="original-price">₹{product.originalPrice}</span>
+                          )}
+                        </div>
+                        <button className="add-to-cart-btn" onClick={() => addToCart(product)}>Add to Cart</button>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="empty-state">
+                    <p>No products found matching your search.</p>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -271,7 +287,7 @@ function App() {
                 const username = email.split('@')[0];
                 
                 try {
-                  const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/login`, { email, password });
+                  const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/login`, { email, password });
                   setUsers([...users, response.data.user]);
                   alert(`Successfully registered/logged in as ${username}!`);
                   e.target.reset();
@@ -302,18 +318,26 @@ function App() {
               <p>Please enter your credentials to access the dashboard.</p>
               <form className="auth-form" onSubmit={async (e) => { 
                 e.preventDefault(); 
+                const username = e.target.elements[0].value;
+                const email = e.target.elements[1].value;
+                const password = e.target.elements[2].value;
+
                 try {
+                  // Verify/Register Admin in DB
+                  await axios.post(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/admin/login`, { username, email, password });
+
+                  // Fetch Dashboard Data
                   const [userRes, orderRes] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users`),
-                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders`)
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/users`),
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/orders`)
                   ]);
                   setUsers(userRes.data);
                   setOrders(orderRes.data);
-                  alert('Admin authenticated!');
+                  alert(`Admin Authenticated: Welcome ${username}!`);
                   setCurrentPage('admin');
                 } catch (err) {
                   console.error('Admin fetch error', err);
-                  alert('Error fetching data from database');
+                  alert('Error authenticating admin or fetching data');
                 }
               }}>
                 <div className="form-group">
@@ -337,9 +361,24 @@ function App() {
         {/* ADMIN DASHBOARD PAGE */}
         {currentPage === 'admin' && (
           <div className="admin-page">
-            <div className="page-header">
-              <h2>Admin Dashboard</h2>
-              <p>Manage users and monitor orders in real-time.</p>
+            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2>Admin Dashboard</h2>
+                <p>Manage users and monitor orders in real-time.</p>
+              </div>
+              <button className="auth-btn" onClick={async () => {
+                try {
+                  const [userRes, orderRes] = await Promise.all([
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/users`),
+                    axios.get(`${import.meta.env.VITE_API_URL || 'http://65.1.92.101:5001'}/api/orders`)
+                  ]);
+                  setUsers(userRes.data);
+                  setOrders(orderRes.data);
+                  alert('Data refreshed!');
+                } catch (err) {
+                  alert('Error refreshing data');
+                }
+              }}>Refresh Data</button>
             </div>
 
             <div className="admin-section">
@@ -366,7 +405,7 @@ function App() {
                         <tr key={user.id}>
                           <td>#{user.id}</td>
                           <td>{user.email}</td>
-                          <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                          <td>{user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</td>
                           <td><button className="text-btn">Manage</button></td>
                         </tr>
                       ))
@@ -401,7 +440,7 @@ function App() {
                           <td>#ORD-{order.id}</td>
                           <td>{order.full_name}</td>
                           <td>₹{order.total_bill}</td>
-                          <td>{new Date(order.created_at).toLocaleDateString()}</td>
+                          <td>{order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
                         </tr>
                       ))
                     )}

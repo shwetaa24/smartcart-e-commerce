@@ -1,43 +1,23 @@
 services:
-  db:
-    image: postgres:15-alpine
-    container_name: swiftcart-db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: swiftcart
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   backend:
-    build: ./backend
+    image: ${DOCKERHUB_USERNAME}/swiftcart-backend:latest
     container_name: swiftcart-backend
     restart: always
     ports:
-      - "5000:5000"
+      - "5001:5001"
     environment:
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_HOST=db
-      - DB_NAME=swiftcart
-      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
       - NODE_ENV=production
-    depends_on:
-      - db
 
   frontend:
-    build: ./frontend
+    image: ${DOCKERHUB_USERNAME}/swiftcart-frontend:latest
     container_name: swiftcart-frontend
     restart: always
     ports:
       - "80:80"
-    environment:
-      - VITE_API_URL=http://localhost:5000
     depends_on:
       - backend
-
-volumes:
-  postgres_data:

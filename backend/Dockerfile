@@ -11,7 +11,8 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/index.js ./
-COPY --from=builder /app/.env ./
+# .env is NOT baked into the image for security.
+# It is injected at runtime via docker-compose env_file
 
-EXPOSE 5000
+EXPOSE 5001
 CMD ["npm", "start"]
