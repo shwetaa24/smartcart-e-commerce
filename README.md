@@ -1,10 +1,10 @@
-# 🛒 SwiftCart — Full-Stack E-Commerce
+# SwiftCart — Full-Stack E-Commerce
 
 SwiftCart is a premium, full-stack e-commerce solution featuring a React frontend, Node.js backend, and PostgreSQL database. It is fully containerized and features an automated CI/CD pipeline for AWS deployment.
 
 ---
 
-## ✨ Features
+## Features
 - **Seamless Shopping**: Product catalog, interactive cart, and automated checkout.
 - **Admin Dashboard**: Real-time monitoring of users and orders.
 - **Automated Deploy**: CI/CD via GitHub Actions to AWS EC2.
@@ -12,27 +12,27 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 
 ---
 
-## 📸 Project Showcase
+## Project Showcase
 
-### 🛍️ 1. Live Product Gallery (EC2)
+### 1. Live Product Gallery (EC2)
 ![Shop Page](public/ec2.png)
 *A high-performance product catalog built with React, deployed and accessible on AWS EC2.*
 
-### 💳 2. Interactive Checkout & Billing System
+### 2. Interactive Checkout & Billing System
 ![Checkout](public/bill.png)
 *Streamlined shopping experience featuring dynamic cart management and automated tax calculations.*
 
-### 📂 3. AWS RDS PostgreSQL Database Management
+### 3. AWS RDS PostgreSQL Database Management
 ![Database](public/Db.png)
 *Robust data persistence showcasing real-time order storage and relational database integrity.*
 
-### 🚀 4. Automated CI/CD Pipeline (GitHub Actions)
+### 4. Automated CI/CD Pipeline (GitHub Actions)
 ![CI/CD](public/git.png)
 *Full-stack deployment workflow utilizing GitHub Actions and Docker to automate EC2 updates.*
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 - **Frontend**: React 19, Vite, Lucide React
 - **Backend**: Node.js, Express, PostgreSQL (pg)
 - **Infrastructure**: AWS (EC2, RDS), Docker, Nginx
@@ -40,7 +40,7 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Configure Environment
 Create `backend/.env`:
@@ -66,7 +66,7 @@ docker compose -f docker-compose.build.yml up -d --build
 
 ---
 
-## 🔄 CI/CD & Deployment
+## CI/CD & Deployment
 This project uses **GitHub Actions** for automated deployment. Every push to `main` triggers:
 1. **Docker Build**: Frontend and Backend images built and pushed to Docker Hub.
 2. **EC2 Deployment**: Automated SSH script updates containers on the AWS instance.
@@ -75,7 +75,7 @@ This project uses **GitHub Actions** for automated deployment. Every push to `ma
 
 ---
 
-## 👨‍💼 Admin Panel
+## Admin Panel
 - **URL**: Accessible via the "Admin" button in the navigation.
 - **Default Credentials**: `admin@swiftcart.com` / `admin123`
 
