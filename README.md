@@ -14,17 +14,21 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 
 ## 📸 Project Showcase
 
-### 1. Live Product Gallery (Frontend)
+### 🛍️ 1. Live Product Gallery (EC2)
 ![Shop Page](public/ec2.png)
+*A high-performance product catalog built with React, deployed and accessible on AWS EC2.*
 
-### 2. Interactive Checkout & Billing System
+### 💳 2. Interactive Checkout & Billing System
 ![Checkout](public/bill.png)
+*Streamlined shopping experience featuring dynamic cart management and automated tax calculations.*
 
-### 3. AWS RDS PostgreSQL Database Management
+### 📂 3. AWS RDS PostgreSQL Database Management
 ![Database](public/Db.png)
+*Robust data persistence showcasing real-time order storage and relational database integrity.*
 
-### 4. Automated CI/CD Pipeline via GitHub Actions
+### 🚀 4. Automated CI/CD Pipeline (GitHub Actions)
 ![CI/CD](public/git.png)
+*Full-stack deployment workflow utilizing GitHub Actions and Docker to automate EC2 updates.*
 
 ---
 
