@@ -1,5 +1,7 @@
 # 🛒 SwiftCart — Full-Stack E-Commerce
 
+![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
 SwiftCart is a premium, full-stack e-commerce solution featuring a React frontend, Node.js backend, and PostgreSQL database. It is fully containerized and features an automated CI/CD pipeline for AWS deployment.
 
 ---
@@ -9,6 +11,7 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 - **Admin Dashboard**: Real-time monitoring of users and orders.
 - **Automated Deploy**: CI/CD via GitHub Actions to AWS EC2.
 - **Database Integrated**: Persistent storage with AWS RDS (PostgreSQL).
+- **Infrastructure as Code**: Fully automated AWS provisioning using Terraform.
 
 ---
 
@@ -32,10 +35,29 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 
 ---
 
+## 🏗️ Cloud Infrastructure (Terraform)
+
+This project uses **Terraform** to manage its AWS infrastructure, ensuring a consistent and reproducible environment.
+
+### Components:
+- **VPC & Networking**: Custom subnets in multiple Availability Zones for high availability.
+- **EC2 Application Server**: A `t2.micro` instance running Ubuntu, pre-configured with Docker.
+- **RDS PostgreSQL**: A managed database instance isolated from public access.
+- **Security Groups**: Strict ingress rules allowing only essential traffic (SSH, HTTP, Backend API).
+
+### To provision:
+```bash
+cd terraform
+terraform init
+terraform apply -var="db_password=YourPassword"
+```
+
+---
+
 ## 🛠️ Technology Stack
 - **Frontend**: React 19, Vite, Lucide React
 - **Backend**: Node.js, Express, PostgreSQL (pg)
-- **Infrastructure**: AWS (EC2, RDS), Docker, Nginx
+- **Infrastructure**: AWS (EC2, RDS), Terraform, Docker, Nginx
 - **DevOps**: GitHub Actions (CI/CD)
 
 ---
@@ -48,28 +70,24 @@ Create `backend/.env`:
 DB_USER=postgres
 DB_PASSWORD=your_password
 DB_HOST=your-rds-endpoint.amazonaws.com
-DB_NAME=postgres
+DB_NAME=smartcartdb
 DB_PORT=5432
 ```
 
 ### 2. Run with Docker (Recommended)
 ```bash
 # Build and start services
-docker compose -f docker-compose.build.yml up -d --build
+docker compose up -d --build
 ```
 - **App**: http://localhost:3000
 - **API**: http://localhost:5002
-
-### 3. Local Development
-**Backend:** `cd backend && npm install && npm start` (Port 5001)  
-**Frontend:** `cd frontend && npm install && npm run dev` (Port 5173)
 
 ---
 
 ## 🔄 CI/CD & Deployment
 This project uses **GitHub Actions** for automated deployment. Every push to `main` triggers:
 1. **Docker Build**: Frontend and Backend images built and pushed to Docker Hub.
-2. **EC2 Deployment**: Automated SSH script updates containers on the AWS instance.
+2. **EC2 Deployment**: Automated SSH script updates containers on the AWS instance inside the `swiftcart` directory.
 
 **Required Secrets:** `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `EC2_HOST`, `EC2_SSH_KEY`, `DB_HOST`, `DB_PASSWORD`.
 
