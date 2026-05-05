@@ -33,6 +33,10 @@ SwiftCart is a premium, full-stack e-commerce solution featuring a React fronten
 ![CI/CD](public/git.png)
 *Full-stack deployment workflow utilizing GitHub Actions and Docker to automate EC2 updates.*
 
+### 5. Infrastructure as Code (Terraform)
+![Terraform Configuration](public/teraaform.png)
+*Automated provisioning of AWS resources including VPC, EC2, and RDS using Terraform.*
+
 ---
 
 ## 🏗️ Cloud Infrastructure (Terraform)
